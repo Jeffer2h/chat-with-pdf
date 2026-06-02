@@ -1,0 +1,86 @@
+{
+  "_description": "Eval set for chunking strategy comparison. Each question has a 'reference' passage that must appear (substring match, case-insensitive, whitespace-tolerant) inside any retrieved chunk for it to count as relevant. All questions are in English (the document language). Cross-lingual retrieval was tested in an earlier iteration and consistently degraded recall by ~15% with monolingual embedders — kept as a known limitation in the README, not in the eval. Source PDF: data/pdfs/2605.11157v1.pdf (Nicholas Teh — The Price of Proportional Representation in Temporal Voting, arXiv:2605.11157v1).",
+  "pdf": "data/pdfs/2605.11157v1.pdf",
+  "questions": [
+    {
+      "question": "How does the paper describe the temporal voting model?",
+      "reference": "framework for long-term collective decision-making"
+    },
+    {
+      "question": "How does the paper formalize the tension between social welfare and proportionality?",
+      "reference": "worst-case ratio between the maximum achievable utilitarian welfare and the maximum welfare attainable subject to a proportionality axiom"
+    },
+    {
+      "question": "What ML-driven system examples does the paper use to motivate repeated exposure allocation?",
+      "reference": "selecting a featured creator each day, a highlighted job posting each week"
+    },
+    {
+      "question": "What is the qualitative bound on welfare loss when enforcing proportional representation?",
+      "reference": "growing, yet sublinear, welfare loss"
+    },
+    {
+      "question": "How is PJR positioned relative to JR and EJR in the axiom hierarchy?",
+      "reference": "intermediate axiom between JR and EJR"
+    },
+    {
+      "question": "What is the asymptotic behavior of the welfare loss under the JR axiom as the time horizon grows?",
+      "reference": "welfare loss diminishes as the time horizon grows and vanishes asymptotically"
+    },
+    {
+      "question": "What does Lemma 4.2 establish about EJR+ under static preferences?",
+      "reference": "an outcome satisfies EJR+ iff it satisfies EJR"
+    },
+    {
+      "question": "What complexity class does the paper place the Phi-UTIL decision problem in?",
+      "reference": "is NP-complete, even when voters have static preferences"
+    },
+    {
+      "question": "How is utilitarian welfare defined in this paper?",
+      "reference": "the total number of approving voter-round pairs"
+    },
+    {
+      "question": "What term does the paper use for groups of voters who react similarly across rounds?",
+      "reference": "behavioral types"
+    },
+    {
+      "question": "What algorithmic technique gives the FPT result for JR-MAXUTIL parameterized by the number of voter types?",
+      "reference": "we obtain a dynamic program"
+    },
+    {
+      "question": "What structural parameter makes welfare maximization tractable via FPT algorithms?",
+      "reference": "parameterized by the number of voter types"
+    },
+    {
+      "question": "What qualitative claim does the paper make about the time horizon and the cost of JR?",
+      "reference": "increasing the time horizon can make JR cheap"
+    },
+    {
+      "question": "What are the two central questions the paper sets out to answer?",
+      "reference": "How costly is enforcing proportional representation in temporal voting"
+    },
+    {
+      "question": "Why does the paper focus on EJR+ rather than FJR?",
+      "reference": "while FJR is always satisfiable"
+    },
+    {
+      "question": "What related model does the paper distinguish itself from where decisions depend on the history of past rounds?",
+      "reference": "perpetual voting model"
+    },
+    {
+      "question": "What kind of proportionality axiom do Elkind et al. (2024b) study, which the paper distinguishes from its own focus?",
+      "reference": "individual proportionality notion"
+    },
+    {
+      "question": "How does the paper characterize the novelty of its contribution?",
+      "reference": "first systematic study of the efficiency cost"
+    },
+    {
+      "question": "What structural restrictions are used in the hardness reductions?",
+      "reference": "even under static preferences and constant approval-degree"
+    },
+    {
+      "question": "What does the paper prove about welfare maximization being approximable?",
+      "reference": "APX-hard"
+    }
+  ]
+}

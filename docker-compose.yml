@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+    # Optional so a fresh clone without a .env still starts: the app then shows
+    # its own "ANTHROPIC_API_KEY is not set" message instead of a Compose crash.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HF_HOME=/root/.cache/huggingface
+    volumes:
+      - .:/app
+      - hf_cache:/root/.cache/huggingface
+
+volumes:
+  hf_cache:

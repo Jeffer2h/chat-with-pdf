@@ -1,0 +1,46 @@
+[project]
+name = "chat-with-pdf"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.50.0",
+    "chromadb>=0.6.0",
+    "voyageai>=0.3.0,<1.0",
+    "pypdf>=5.0.0",
+    "streamlit>=1.40.0",
+    "tiktoken>=0.7.0",
+    "numpy>=1.26.0",
+    "langchain-text-splitters>=0.3.0",
+]
+
+# Optional extra for running embeddings/reranker locally with sentence-transformers.
+# Pulls in PyTorch (~800MB) — kept out of the default install so production images stay slim.
+# Install with: `uv sync --extra local`
+[project.optional-dependencies]
+local = [
+    "sentence-transformers>=3.0.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+# Strict typing on the `src/` package only. Tests and scripts use Streamlit /
+# pytest patterns that don't play nicely with strict typing and aren't worth
+# the noise for a portfolio demo.
+[tool.mypy]
+files = ["src"]
+strict = true
+ignore_missing_imports = true
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "mypy>=1.13.0",
+    "ruff>=0.8.0",
+]

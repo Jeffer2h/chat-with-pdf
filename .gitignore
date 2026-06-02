@@ -1,0 +1,11 @@
+.env
+__pycache__/
+.venv/
+*.pyc
+*.pyo
+chroma_db/
+data/pdfs/
+logs/
+*.db
+.mypy_cache/
+.ruff_cache/

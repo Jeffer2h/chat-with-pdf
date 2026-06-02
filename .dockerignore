@@ -1,0 +1,36 @@
+# --- Python build artifacts ---
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# --- VCS and IDE ---
+.git/
+.gitignore
+.vscode/
+.idea/
+.claude/
+
+# --- Secrets ---
+.env
+
+# --- Local-only artifacts not needed inside the image ---
+# Eval sets, sample PDFs, generated result tables — only used by scripts/ which
+# are not part of the deployed app. Keeping them out shrinks the image and
+# avoids shipping large sample PDFs to the registry.
+data/
+logs/
+chroma_db/
+
+# Research/eval scripts — the deployed app only needs app.py + src/.
+scripts/
+
+# Tests — never needed at runtime.
+tests/
+
+# Docs — small but irrelevant at runtime.
+*.md

@@ -1,0 +1,66 @@
+{
+  "_description": "Third eval set, designed to test the hypothesis that retrieval quality is content-dependent: simpler factual content (Wikipedia) should give higher recall than dense academic papers. All questions are in English. Source PDF: data/pdfs/Radamel_Falcao.pdf (English Wikipedia article on Radamel Falcao).",
+  "pdf": "data/pdfs/Radamel_Falcao.pdf",
+  "questions": [
+    {
+      "question": "When was Radamel Falcao born?",
+      "reference": "10 February 1986"
+    },
+    {
+      "question": "What is Falcao's well-known nickname?",
+      "reference": "El Tigre"
+    },
+    {
+      "question": "Where was Falcao born?",
+      "reference": "Santa Marta, Magdalena, Colombia"
+    },
+    {
+      "question": "What was the transfer fee paid by Atlético Madrid for Falcao?",
+      "reference": "a club record €40 million"
+    },
+    {
+      "question": "How much did Monaco pay to sign Falcao in 2013?",
+      "reference": "a club record €60 million"
+    },
+    {
+      "question": "Which two Premier League clubs did Falcao play for on loan?",
+      "reference": "Manchester United and Chelsea"
+    },
+    {
+      "question": "Which Colombian club did Falcao debut professionally with?",
+      "reference": "Lanceros Boyacá"
+    },
+    {
+      "question": "Which individual award did Falcao win in 2012?",
+      "reference": "2012 Globe Soccer Best Footballer"
+    },
+    {
+      "question": "What injury kept Falcao out for six months at Monaco?",
+      "reference": "an ACL injury ruled him out for six months"
+    },
+    {
+      "question": "At what age did Falcao make his professional debut?",
+      "reference": "13 years and 199 days"
+    },
+    {
+      "question": "Which Turkish club did Falcao join in 2019?",
+      "reference": "Galatasaray"
+    },
+    {
+      "question": "What treble did Falcao win with Porto in 2011?",
+      "reference": "UEFA Europa League, Taça de Portugal and Primeira Liga treble"
+    },
+    {
+      "question": "How many goals did Falcao score in his record-breaking European campaign?",
+      "reference": "most goals (17) in a European campaign"
+    },
+    {
+      "question": "Which FIFA World Cup did Falcao miss due to injury?",
+      "reference": "missed the 2014 FIFA World Cup through injury"
+    },
+    {
+      "question": "What goalscoring record does Falcao hold for the Colombia national team?",
+      "reference": "top goalscorer for the Colombia national team"
+    }
+  ]
+}
