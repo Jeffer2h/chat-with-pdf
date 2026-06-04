@@ -1,11 +1,15 @@
-"""SQLite-backed observability helper for LLM calls.
+"""Observability helper for LLM calls (Claude + Voyage embed/rerank).
 
-Each call is logged with model, tokens, latency, estimated cost and
-success/error info. Mirrors the portfolio-wide observability convention.
+Hybrid sink: local dev writes to SQLite (`logs/llm_calls.db`); on Cloud
+Run (detected via the platform-set K_SERVICE env var) emits one JSON
+line per call to stdout, which Cloud Logging captures automatically.
 """
 
+import json
 import logging
+import os
 import sqlite3
+import sys
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -158,36 +162,62 @@ def log_llm_call(
         cost_usd = estimate_cost_usd(
             model, record["input_tokens"], record["output_tokens"]
         )
-        # Wrap the DB write so a SQLite failure never replaces the original
-        # exception. If the logger itself fails, we lose the log entry but the
-        # caller's exception (e.g. an API error) is still propagated correctly.
-        try:
-            conn = _ensure_table(db_path)
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        if os.environ.get("K_SERVICE"):
+            # Cloud Run: emit JSON to stdout. `return` inside `finally` would
+            # swallow any in-flight exception from the wrapped block, so route
+            # via if/else instead and let the finally exit naturally.
             try:
-                conn.execute(
-                    """
-                    INSERT INTO llm_calls (
-                        timestamp, project, model,
-                        input_tokens, output_tokens,
-                        latency_ms, cost_usd, success, error_msg
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        datetime.now(timezone.utc).isoformat(),
-                        project,
-                        model,
-                        record["input_tokens"],
-                        record["output_tokens"],
-                        latency_ms,
-                        cost_usd,
-                        1 if success else 0,
-                        error_msg,
-                    ),
+                json.dump(
+                    {
+                        "event": "llm_call",
+                        "timestamp": timestamp,
+                        "project": project,
+                        "model": model,
+                        "input_tokens": record["input_tokens"],
+                        "output_tokens": record["output_tokens"],
+                        "latency_ms": latency_ms,
+                        "cost_usd": cost_usd,
+                        "success": success,
+                        "error_msg": error_msg,
+                    },
+                    sys.stdout,
                 )
-                conn.commit()
-            finally:
-                conn.close()
-        except Exception as log_exc:
-            # Surface the failure during development without masking the
-            # caller's original exception (which is already in flight if any).
-            _logger.warning("Failed to write llm_calls row: %s", log_exc)
+                sys.stdout.write("\n")
+                sys.stdout.flush()
+            except Exception as log_exc:
+                _logger.warning("Failed to emit llm_call JSON: %s", log_exc)
+        else:
+            # Local dev: persist to SQLite. Wrap the DB write so a SQLite
+            # failure never replaces the original exception. If the logger
+            # itself fails we lose the log entry but the caller's exception
+            # (e.g. an API error) is still propagated correctly.
+            try:
+                conn = _ensure_table(db_path)
+                try:
+                    conn.execute(
+                        """
+                        INSERT INTO llm_calls (
+                            timestamp, project, model,
+                            input_tokens, output_tokens,
+                            latency_ms, cost_usd, success, error_msg
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            timestamp,
+                            project,
+                            model,
+                            record["input_tokens"],
+                            record["output_tokens"],
+                            latency_ms,
+                            cost_usd,
+                            1 if success else 0,
+                            error_msg,
+                        ),
+                    )
+                    conn.commit()
+                finally:
+                    conn.close()
+            except Exception as log_exc:
+                _logger.warning("Failed to write llm_calls row: %s", log_exc)
