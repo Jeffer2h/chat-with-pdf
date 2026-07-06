@@ -1,0 +1,91 @@
+# Deploy — builds and deploys to Cloud Run on every push to main.
+#
+# This copy is for repo 01 (chat-with-pdf). Per-repo values (service name,
+# --set-secrets, --set-env-vars) differ across repos; see the portfolio table.
+#
+# Design decisions:
+# - Single workflow: `test` job + `deploy` job with `needs: test`. The deploy
+#   can never run against a commit whose tests fail in THIS run, and the whole
+#   pipeline is visible as one graph in the Actions tab.
+# - `gcloud run deploy --source .` (Cloud Build builds the image remotely):
+#   same proven path used for the initial manual deploys, one command, no
+#   registry auth / image tagging to manage in the workflow.
+# - Auth is keyless via Workload Identity Federation (google-github-actions/auth
+#   exchanges the GitHub OIDC token for portfolio-deployer credentials).
+# - All flags are explicit so this file — not the live service — is the source
+#   of truth for the service configuration.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Never run two deploys of the same service at once; queue instead of cancel
+# so the latest commit always ends up deployed.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run tests
+        run: uv run pytest
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required to mint the GitHub OIDC token for WIF
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (WIF, no keys)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/331225567898/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: portfolio-deployer@jeffer-portfolio.iam.gserviceaccount.com
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy chat-with-pdf \
+            --source . \
+            --project jeffer-portfolio \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --service-account portfolio-deployer@jeffer-portfolio.iam.gserviceaccount.com \
+            --memory 1Gi \
+            --concurrency 80 \
+            --max-instances 3 \
+            --cpu-throttling \
+            --cpu-boost \
+            --session-affinity \
+            --set-secrets "ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,VOYAGE_API_KEY=VOYAGE_API_KEY:latest" \
+            --set-env-vars "EMBEDDING_BACKEND=voyage,RERANKER_BACKEND=voyage" \
+            --quiet
+
+      - name: Smoke check (Streamlit health endpoint)
+        run: |
+          URL=$(gcloud run services describe chat-with-pdf \
+            --project jeffer-portfolio --region us-central1 \
+            --format='value(status.url)')
+          curl -sSf --retry 5 --retry-delay 5 --retry-all-errors "$URL/_stcore/health"
